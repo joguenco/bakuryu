@@ -82,19 +82,6 @@ async fn auth_validator(
         .first::<AccessToken>(&mut conn)
         .optional();
 
-    println!(
-        "Token status: {},",
-        token_exists
-            .as_ref()
-            .unwrap()
-            .as_ref()
-            .map(|t| t
-                .status
-                .map(|s| s.to_string())
-                .unwrap_or("None".to_string()))
-            .unwrap_or("None".to_string())
-    );
-
     match token_exists {
         Ok(Some(_)) => Ok(req),
         Ok(None) => Err((error::ErrorUnauthorized("Unauthorized"), req)),

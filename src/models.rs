@@ -8,3 +8,12 @@ pub struct AccessToken {
     pub token: String,
     pub status: Option<bool>,
 }
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::schema::entity)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Entity {
+    pub id: i32,
+    pub name: String,
+    pub folder_path: String,
+}

@@ -57,6 +57,6 @@ diesel migration run
 ```
 Redo migration
 ```
-diesel migration redo   
+diesel migration revert   
 ```
 
