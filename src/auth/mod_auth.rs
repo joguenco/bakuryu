@@ -4,7 +4,24 @@ use actix_web::{Error, dev::ServiceRequest, error};
 use actix_web::{HttpMessage, web};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use diesel::prelude::*;
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
+use serde::{Deserialize, Serialize};
+use std::env;
 use std::ops::DerefMut;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    iss: String,
+    iat: f64,
+    exp: f64,
+    aud: String,
+    sub: String,
+    client: String,
+    name: String,
+    email: String,
+    role: Vec<String>,
+    service: String,
+}
 
 pub async fn auth_validator(
     req: ServiceRequest,
@@ -34,12 +51,21 @@ pub async fn auth_validator(
 
     match token_exists {
         Ok(Some(found_token)) => {
-            let tok = found_token.token.clone();
-            req.extensions_mut().insert(tok.clone());
-            println!("Token to backup: {:?}", tok);
+            req.extensions_mut().insert(found_token.token.clone());
             Ok(req)
         }
         Ok(None) => Err((error::ErrorUnauthorized("Unauthorized"), req)),
         Err(e) => Err((error::ErrorInternalServerError(e), req)),
     }
+}
+
+pub fn get_claims_from_token(token: &str) -> Result<Claims, jsonwebtoken::errors::Error> {
+    let secret_env = env::var("PRIVATE_KEY").expect("failed to get PRIVATE_KEY from env");
+    let secret = secret_env.as_bytes();
+    let decoding_key = DecodingKey::from_secret(secret);
+    let mut validation = Validation::new(Algorithm::HS256);
+    validation.validate_exp = false;
+    validation.set_audience(&["resolvedor.dev"]);
+    let token_data = decode::<Claims>(token, &decoding_key, &validation)?;
+    Ok(token_data.claims)
 }

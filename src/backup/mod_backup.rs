@@ -1,3 +1,4 @@
+use crate::auth::mod_auth::get_claims_from_token;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
 use actix_web::{Error, HttpMessage, HttpRequest, HttpResponse, Result, post};
 use std::fs;
@@ -21,7 +22,14 @@ pub async fn backup(
         .clone()
         .unwrap_or_else(|| "No token found".to_string());
 
-    println!("Token from auth in backup handler: {:?}", value);
+    let claim = match get_claims_from_token(&value) {
+        Ok(claims) => claims,
+        Err(e) => {
+            println!("Error extracting claims: {:?}", e);
+            return Err(actix_web::error::ErrorUnauthorized("Invalid token"));
+        }
+    };
+    println!("Token claims: {:?}", claim);
 
     let file_name = form
         .file_data

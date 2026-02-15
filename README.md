@@ -41,7 +41,8 @@ cargo install diesel_cli --no-default-features --features postgres
 ```
 Create .env file
 ```
-DATABASE_URL=postgres://hello:h@localhost/hello
+DATABASE_URL=postgres://bakuryu:b@localhost/bakuryu
+PRIVATE_KEY=0123456789qwertyuiopasdfghjklzxcvbnm
 ```
 Only when project is created
 ```
@@ -57,6 +58,6 @@ diesel migration run
 ```
 Redo migration
 ```
-diesel migration revert   
+diesel migration revert
 ```
 
