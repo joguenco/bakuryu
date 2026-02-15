@@ -10,3 +10,5 @@ diesel = { version = "2.2.0", features = ["postgres", "r2d2"] }
 dotenvy = "0.15"
 actix-web-httpauth = "0.8.2"
 actix-multipart = "0.7.2"
+os_info = "3"
+rustc_version_runtime = "0.3.0"

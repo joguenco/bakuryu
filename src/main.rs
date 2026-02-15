@@ -64,7 +64,7 @@ async fn auth_validator(
         return Err((error::ErrorBadRequest("Unauthorized"), req));
     };
 
-    let token = credentials.token().to_string();
+    let bearer_token = credentials.token().to_string();
 
     let pool = req.app_data::<web::Data<DBPool>>().unwrap();
 
@@ -73,10 +73,11 @@ async fn auth_validator(
         Err(e) => return Err((error::ErrorInternalServerError(e), req)),
     };
 
-    use crate::schema::access_tokens::dsl::{access_tokens, token as token_col};
+    use crate::schema::access_tokens::dsl::{access_tokens, status, token};
 
     let token_exists = access_tokens
-        .filter(token_col.eq(&token))
+        .filter(token.eq(&bearer_token))
+        .filter(status)
         .select(AccessToken::as_select())
         .first::<AccessToken>(&mut conn)
         .optional();

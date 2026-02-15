@@ -8,8 +8,12 @@ use serde::Serialize;
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct VersionResponse {
+    name: String,
+    author: String,
     version: String,
     version_database: String,
+    os_version: String,
+    runtime_version: String,
 }
 
 #[derive(QueryableByName)]
@@ -32,9 +36,14 @@ pub async fn version(db: Data<DBPool>) -> impl Responder {
                 .unwrap_or_else(|_| "Error".to_string());
 
             let p = VersionResponse {
+                name: "Bakuryu".to_string(),
+                author: "Jorge Luis".to_string(),
                 version: "1.0.0".to_string(),
                 version_database: version_db,
+                os_version: os_info::get().to_string(),
+                runtime_version: format!("Rust {}", rustc_version_runtime::version()),
             };
+
             HttpResponse::Ok().json(p)
         }
         Err(e) => HttpResponse::InternalServerError().json(e.to_string()),

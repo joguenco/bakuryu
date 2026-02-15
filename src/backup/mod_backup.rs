@@ -1,7 +1,4 @@
-use actix_multipart::{
-    Multipart,
-    form::{MultipartForm, tempfile::TempFile, text::Text},
-};
+use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
 use actix_web::{Error, HttpResponse, Result, post};
 use std::fs;
 
