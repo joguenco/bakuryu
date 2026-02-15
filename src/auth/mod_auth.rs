@@ -1,7 +1,7 @@
 use crate::DBPool;
 use crate::models::AccessToken;
-use actix_web::web;
 use actix_web::{Error, dev::ServiceRequest, error};
+use actix_web::{HttpMessage, web};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use diesel::prelude::*;
 use std::ops::DerefMut;
@@ -33,7 +33,12 @@ pub async fn auth_validator(
         .optional();
 
     match token_exists {
-        Ok(Some(_)) => Ok(req),
+        Ok(Some(found_token)) => {
+            let tok = found_token.token.clone();
+            req.extensions_mut().insert(tok.clone());
+            println!("Token to backup: {:?}", tok);
+            Ok(req)
+        }
         Ok(None) => Err((error::ErrorUnauthorized("Unauthorized"), req)),
         Err(e) => Err((error::ErrorInternalServerError(e), req)),
     }

@@ -1,5 +1,5 @@
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
-use actix_web::{Error, HttpResponse, Result, post};
+use actix_web::{Error, HttpMessage, HttpRequest, HttpResponse, Result, post};
 use std::fs;
 
 #[derive(Debug, MultipartForm)]
@@ -10,9 +10,18 @@ pub struct FormWithFile {
 
 #[post("/backup")]
 pub async fn backup(
+    req: HttpRequest,
     MultipartForm(form): MultipartForm<FormWithFile>,
 ) -> Result<HttpResponse, Error> {
     print!("Name: {:?}\n", form.name.as_str());
+
+    let token_from_auth = req.extensions().get::<String>().cloned();
+
+    let value = token_from_auth
+        .clone()
+        .unwrap_or_else(|| "No token found".to_string());
+
+    println!("Token from auth in backup handler: {:?}", value);
 
     let file_name = form
         .file_data
