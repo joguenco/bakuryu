@@ -11,6 +11,7 @@ use std::path::Path;
 #[derive(Debug, MultipartForm)]
 struct FormWithFile {
     sha2_code: Text<String>,
+    #[multipart(limit = "2048MB")]
     file_data: TempFile,
 }
 
