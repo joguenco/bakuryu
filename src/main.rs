@@ -1,9 +1,7 @@
 mod auth;
 mod backup;
 mod db;
-mod models;
 mod ping;
-mod schema;
 mod version;
 use crate::auth::auth_validator;
 use crate::backup::mod_backup::backup as backup_handler;

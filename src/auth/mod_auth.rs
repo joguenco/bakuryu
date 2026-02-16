@@ -1,5 +1,5 @@
 use crate::DBPool;
-use crate::models::AccessToken;
+use crate::db::models::AccessToken;
 use actix_web::{Error, dev::ServiceRequest, error};
 use actix_web::{HttpMessage, web};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
@@ -40,7 +40,7 @@ pub async fn auth_validator(
         Err(e) => return Err((error::ErrorInternalServerError(e), req)),
     };
 
-    use crate::schema::access_tokens::dsl::{access_tokens, status, token};
+    use crate::db::schema::access_tokens::dsl::{access_tokens, status, token};
 
     let token_exists = access_tokens
         .filter(token.eq(&bearer_token))

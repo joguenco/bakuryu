@@ -1,6 +1,6 @@
 use crate::DBPool;
 use crate::auth::mod_auth::get_claims_from_token;
-use crate::models::Entity;
+use crate::db::models::Entity;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
 use actix_web::{Error, HttpMessage, HttpRequest, HttpResponse, Result, post, web};
 use diesel::pg::PgConnection;
@@ -55,7 +55,7 @@ pub async fn backup(
 }
 
 fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> String {
-    use crate::schema::entity::dsl::{entity, name};
+    use crate::db::schema::entity::dsl::{entity, name};
 
     let result_entity = entity
         .filter(name.eq(&name_from_jwt))
