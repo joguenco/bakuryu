@@ -17,7 +17,7 @@ pub struct Claims {
     aud: String,
     sub: String,
     client: String,
-    name: String,
+    pub(crate) name: String,
     email: String,
     role: Vec<String>,
     service: String,

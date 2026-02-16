@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "format": "httpie",
+    "version": "1.0.0",
+    "contentType": "workspace",
+    "schema": "https://schema.httpie.io/1.0.0.json",
+    "docs": "https://httpie.io/r/help/export-from-httpie",
+    "source": "HTTPie Desktop 2025.2.0"
+  },
+  "entry": {
+    "name": "Bakuryu",
+    "icon": {
+      "name": "default",
+      "color": "orange"
+    },
+    "collections": [
+      {
+        "name": "Bakuryu",
+        "icon": {
+          "name": "default",
+          "color": "orange"
+        },
+        "auth": {
+          "type": "none"
+        },
+        "requests": [
+          {
+            "name": "Ping",
+            "url": "{{HOST}}/ping",
+            "method": "GET",
+            "headers": [],
+            "queryParams": [],
+            "pathParams": [],
+            "auth": {
+              "type": "inherited"
+            },
+            "body": {
+              "type": "none",
+              "file": {
+                "name": ""
+              },
+              "text": {
+                "value": "",
+                "format": "application/json"
+              },
+              "form": {
+                "isMultipart": false,
+                "fields": []
+              },
+              "graphql": {
+                "query": "",
+                "variables": ""
+              }
+            }
+          },
+          {
+            "name": "Version",
+            "url": "{{HOST}}/version",
+            "method": "GET",
+            "headers": [],
+            "queryParams": [],
+            "pathParams": [],
+            "auth": {
+              "type": "bearer",
+              "target": "headers",
+              "credentials": {
+                "username": "",
+                "password": "{{TOKEN}}"
+              }
+            },
+            "body": {
+              "type": "none",
+              "file": {
+                "name": ""
+              },
+              "text": {
+                "value": "",
+                "format": "application/json"
+              },
+              "form": {
+                "isMultipart": false,
+                "fields": []
+              },
+              "graphql": {
+                "query": "",
+                "variables": ""
+              }
+            }
+          },
+          {
+            "name": "Backup",
+            "url": "{{HOST}}/backup",
+            "method": "POST",
+            "headers": [],
+            "queryParams": [],
+            "pathParams": [],
+            "auth": {
+              "type": "bearer",
+              "target": "headers",
+              "credentials": {
+                "username": "",
+                "password": "{{TOKEN}}"
+              }
+            },
+            "body": {
+              "type": "form",
+              "file": {
+                "name": ""
+              },
+              "text": {
+                "value": "",
+                "format": "application/json"
+              },
+              "form": {
+                "isMultipart": true,
+                "fields": [
+                  {
+                    "name": "sha2_code",
+                    "value": "123456",
+                    "enabled": true,
+                    "type": "text"
+                  },
+                  {
+                    "name": "file_data",
+                    "value": "",
+                    "enabled": true,
+                    "type": "file"
+                  }
+                ]
+              },
+              "graphql": {
+                "query": "",
+                "variables": ""
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "environments": [
+      {
+        "name": "Defaults",
+        "color": "gray",
+        "isDefault": true,
+        "isLocalOnly": false,
+        "variables": [
+          {
+            "name": "HOST",
+            "value": "",
+            "isSecret": false
+          },
+          {
+            "name": "TOKEN",
+            "value": "",
+            "isSecret": false
+          }
+        ]
+      },
+      {
+        "name": "Bakuryu",
+        "color": "red",
+        "isDefault": false,
+        "isLocalOnly": true,
+        "variables": [
+          {
+            "name": "HOST",
+            "value": "http://0.0.0.0:8080",
+            "isSecret": false
+          },
+          {
+            "name": "TOKEN",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyYWRtaW4ucmVzb2x2ZWRvci5kZXYiLCJpYXQiOjE3NzExOTcwNDAsImV4cCI6Mzk5NjEwNDQwMC4wLCJhdWQiOiJyZXNvbHZlZG9yLmRldiIsInN1YiI6ImJ1c3NpbmVzQHJlc29sdmVkb3IuZGV2IiwiY2xpZW50IjoiMTIzNDU2Nzg5MCIsIm5hbWUiOiJKb3JnZSBMdWlzIiwiZW1haWwiOiJqb3JnZWx1aXNAcmVzb2x2ZWRvci5kZXYiLCJyb2xlIjpbImRlbW8iXSwic2VydmljZSI6IlJhZG1pbiJ9.anbHFr1WgMi4l-8FYoneVAmSG7h6LN6xTsD0nWtXBfs",
+            "isSecret": false
+          }
+        ]
+      }
+    ],
+    "drafts": []
+  }
+}
