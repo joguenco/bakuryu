@@ -1,7 +1,7 @@
 {
   "version": "0.1.1",
   "tasks": {
-    "dev": "deno run --allow-read --allow-env main.ts",
+    "dev": "deno run --allow-read --allow-env --allow-net main.ts",
     "build": "deno compile --allow-read --allow-env main.ts"
   },
   "imports": {

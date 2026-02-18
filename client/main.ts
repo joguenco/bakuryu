@@ -3,7 +3,7 @@ import { parseArgs, ParseOptions } from '@std/cli/parse-args'
 import { promptSecret } from '@std/cli/prompt-secret'
 
 import meta from './deno.json' with { type: 'json' }
-import { simulateTask } from './taskRunner.ts'
+import { ping } from './fecthServer.ts'
 
 function printUsage() {
   console.log('Usage: ')
@@ -11,6 +11,7 @@ function printUsage() {
   console.log('Options:')
   console.log('  -h, --help        Show this help message')
   console.log('  -v, --version     Show the version number')
+  console.log('  -p, --ping        Ping the backup server')
   console.log('  -i, --input       Input file')
   console.log('  -o, --output      Output file')
 }
@@ -19,7 +20,7 @@ const options: ParseOptions = {
   boolean: ['help', 'version'],
   string: ['URL', 'token'],
   default: { 'URL': 'https://example.com/data', 'token': 'xxx' },
-  alias: { 'help': 'h', 'version': 'v', 'input': 'i', 'output': 'o' },
+  alias: { 'help': 'h', 'version': 'v', 'input': 'i', 'output': 'o', 'ping': 'p' },
 }
 const args = parseArgs(Deno.args, options)
 
@@ -42,6 +43,7 @@ if (!args.URL || !args.token) {
 // attempt to get the username and password from environment variables
 let user = Deno.env.get('MY_APP_USER')
 let password = Deno.env.get('MY_APP_PASSWORD')
+let urlBackupServer = Deno.env.get('URL_BACKUP_SERVER')
 
 if (user === undefined) {
   const userPrompt = prompt('Please enter the username:')
@@ -51,11 +53,16 @@ if (password === undefined) {
   const passPrompt = promptSecret('Please enter the password:')
   password = passPrompt ?? ''
 }
+if (urlBackupServer === undefined) {
+  const urlPrompt = prompt('Please enter the backup server URL:')
+  urlBackupServer = urlPrompt ?? ''
+}
 
-// simulating a few long-running tasks
-await simulateTask(1000, `Reading input file [${args.URL}]`)
-await simulateTask(1500, `Connecting with user [${user}]`)
-await simulateTask(5000, `Reading data from external system`)
-await simulateTask(3200, `Writing output file [${args.token}]`)
-
-console.log('Done!')
+if (args.ping) {
+  const [isAlive, message] = await ping(urlBackupServer)
+  if (isAlive) {
+    console.log('Server responded: ' + message)
+  } else {
+    console.log(message)
+  }
+}
