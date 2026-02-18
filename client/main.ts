@@ -3,24 +3,26 @@ import { parseArgs, ParseOptions } from '@std/cli/parse-args'
 import { promptSecret } from '@std/cli/prompt-secret'
 
 import meta from './deno.json' with { type: 'json' }
-import { ping } from './fecthServer.ts'
+import { ping, upload, version } from './fecthServer.ts'
 
 function printUsage() {
   console.log('Usage: ')
-  console.log('  client --input <input file> --output <output file>')
+  console.log('Ping to backup server:')
+  console.log('  client --ping')
+  console.log('Show the version number of backup server:')
+  console.log('  client --version-server')
+  console.log('Upload backup file:')
+  console.log('  client --upload <file>')
   console.log('Options:')
   console.log('  -h, --help        Show this help message')
   console.log('  -v, --version     Show the version number')
-  console.log('  -p, --ping        Ping the backup server')
-  console.log('  -i, --input       Input file')
-  console.log('  -o, --output      Output file')
 }
 
 const options: ParseOptions = {
   boolean: ['help', 'version'],
-  string: ['URL', 'token'],
-  default: { 'URL': 'https://example.com/data', 'token': 'xxx' },
-  alias: { 'help': 'h', 'version': 'v', 'input': 'i', 'output': 'o', 'ping': 'p' },
+  string: ['URL', 'token', 'file'],
+  default: { 'URL': 'http://0.0.0.0:8080', 'token': 'xxx', 'file': '' },
+  alias: { 'help': 'h', 'version': 'v', 'ping': 'p', 'version-server': 's', 'upload': 'u' },
 }
 const args = parseArgs(Deno.args, options)
 
@@ -41,21 +43,16 @@ if (!args.URL || !args.token) {
 }
 
 // attempt to get the username and password from environment variables
-let user = Deno.env.get('MY_APP_USER')
-let password = Deno.env.get('MY_APP_PASSWORD')
 let urlBackupServer = Deno.env.get('URL_BACKUP_SERVER')
+let tokenSecret = Deno.env.get('TOKEN_SECRET')
 
-if (user === undefined) {
-  const userPrompt = prompt('Please enter the username:')
-  user = userPrompt ?? ''
-}
-if (password === undefined) {
-  const passPrompt = promptSecret('Please enter the password:')
-  password = passPrompt ?? ''
-}
 if (urlBackupServer === undefined) {
   const urlPrompt = prompt('Please enter the backup server URL:')
   urlBackupServer = urlPrompt ?? ''
+}
+if (tokenSecret === undefined) {
+  const token = await promptSecret('Please enter the token secret:')
+  tokenSecret = token ?? ''
 }
 
 if (args.ping) {
@@ -65,4 +62,29 @@ if (args.ping) {
   } else {
     console.log(message)
   }
+} else if (args['version-server']) {
+  const [success, versionInfo] = await version(urlBackupServer, tokenSecret)
+  if (success && typeof versionInfo === 'object') {
+    console.log('Backup Server Version Information:')
+    console.log(`Name: ${versionInfo.name}`)
+    console.log(`Author: ${versionInfo.author}`)
+    console.log(`Version: ${versionInfo.version}`)
+    console.log(`Database Version: ${versionInfo.versionDatabase}`)
+    console.log(`OS Version: ${versionInfo.versionOs}`)
+    console.log(`Runtime Version: ${versionInfo.versionRuntime}`)
+  } else {
+    console.log(versionInfo)
+  }
+} else if (args.upload) {
+  const file = args.upload
+  const [success, message] = await upload(file, urlBackupServer, tokenSecret)
+  if (success) {
+    console.log(message)
+  } else {
+    console.log(message)
+  }
+} else {
+  console.log('No valid command provided.')
+  printUsage()
+  Deno.exit(1)
 }
