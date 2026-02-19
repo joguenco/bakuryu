@@ -14,3 +14,6 @@ os_info = "3"
 rustc_version_runtime = "0.3.0"
 jsonwebtoken = { version = "10.3.0", features = ["aws_lc_rs"] }
 env_logger = "0.11.9"
+fern = "0.6"
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"

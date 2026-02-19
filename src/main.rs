@@ -1,5 +1,6 @@
 mod auth;
 mod backup;
+mod common;
 mod db;
 mod ping;
 mod version;
@@ -12,20 +13,23 @@ use diesel::{
     PgConnection,
     r2d2::{self, ConnectionManager},
 };
+use dotenvy::dotenv;
+use std::env;
 use std::time::Duration;
 
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::{App, HttpServer, middleware::Logger, web};
 use actix_web_httpauth::middleware::HttpAuthentication;
-use env_logger::Env;
 
 pub type DBPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+    let port = env::var("PORT").expect("failed to get PORT");
     let con = connect();
     let pool_data = web::Data::new(con);
-    env_logger::init_from_env(Env::default().default_filter_or("info"));
+    common::init_logging();
 
     HttpServer::new(move || {
         let auth = HttpAuthentication::with_fn(auth_validator);
@@ -43,7 +47,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
     })
     .client_request_timeout(Duration::from_secs(180))
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", port.parse().unwrap()))?
     .workers(3)
     .run()
     .await

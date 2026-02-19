@@ -14,15 +14,25 @@ function printUsage() {
   console.log('Upload backup file:')
   console.log('  client --upload <file>')
   console.log('Options:')
-  console.log('  -h, --help        Show this help message')
-  console.log('  -v, --version     Show the version number')
+  console.log('  -h, --help               Show this help message')
+  console.log('  -v, --version            Show the version number')
+  console.log(
+    '  -s, --version-server     Show the version number of backup server',
+  )
+  console.log('  -u, --upload             Upload backup file')
 }
 
 const options: ParseOptions = {
   boolean: ['help', 'version'],
   string: ['URL', 'token', 'file'],
-  default: { 'URL': 'http://0.0.0.0:8080', 'token': 'xxx', 'file': '' },
-  alias: { 'help': 'h', 'version': 'v', 'ping': 'p', 'version-server': 's', 'upload': 'u' },
+  default: { URL: 'http://0.0.0.0:8080', token: 'xxx', file: '' },
+  alias: {
+    help: 'h',
+    version: 'v',
+    ping: 'p',
+    'version-server': 's',
+    upload: 'u',
+  },
 }
 const args = parseArgs(Deno.args, options)
 

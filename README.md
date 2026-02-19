@@ -41,6 +41,7 @@ cargo install diesel_cli --no-default-features --features postgres
 ```
 Create .env file
 ```
+PORT=8181
 DATABASE_URL=postgres://bakuryu:b@localhost/bakuryu
 PRIVATE_KEY=0123456789qwertyuiopasdfghjklzxcvbnm
 ```

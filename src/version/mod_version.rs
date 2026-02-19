@@ -3,6 +3,7 @@ use actix_web::web::Data;
 use actix_web::{HttpResponse, Responder, get};
 use diesel::sql_types::Text;
 use diesel::{QueryableByName, RunQueryDsl, sql_query};
+use log;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -44,6 +45,7 @@ pub async fn version(db: Data<DBPool>) -> impl Responder {
                 version_runtime: format!("Rust {}", rustc_version_runtime::version()),
             };
 
+            log::warn!("GET version information");
             HttpResponse::Ok().json(p)
         }
         Err(e) => HttpResponse::InternalServerError().json(e.to_string()),
