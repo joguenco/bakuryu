@@ -16,6 +16,7 @@ function printUsage() {
   console.log('Options:')
   console.log('  -h, --help               Show this help message')
   console.log('  -v, --version            Show the version number')
+  console.log('  -p, --ping               Ping the backup server')
   console.log(
     '  -s, --version-server     Show the version number of backup server',
   )
