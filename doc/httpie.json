@@ -164,7 +164,7 @@
         "variables": [
           {
             "name": "HOST",
-            "value": "http://0.0.0.0:8080",
+            "value": "http://0.0.0.0:8181",
             "isSecret": false
           },
           {
