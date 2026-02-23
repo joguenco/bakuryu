@@ -39,7 +39,7 @@ pub async fn version(db: Data<DBPool>) -> impl Responder {
             let p = VersionResponse {
                 name: "Bakuryu".to_string(),
                 author: "Jorge Luis".to_string(),
-                version: "1.0.0".to_string(),
+                version: "1.0.1".to_string(),
                 version_database: version_db,
                 version_os: os_info::get().to_string(),
                 version_runtime: format!("Rust {}", rustc_version_runtime::version()),

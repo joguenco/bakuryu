@@ -2,9 +2,10 @@ use crate::DBPool;
 use crate::auth::mod_auth::get_claims_from_token;
 use crate::db::models::Entity;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
-use actix_web::{Error, HttpMessage, HttpRequest, HttpResponse, Result, post, web};
+use actix_web::{Error, HttpMessage, HttpRequest, Responder, Result, post, web};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
+use serde::Serialize;
 use std::fs;
 use std::path::Path;
 
@@ -15,11 +16,16 @@ struct FormWithFile {
     file_data: TempFile,
 }
 
+#[derive(Serialize)]
+struct BackupResponse {
+    message: String,
+}
+
 #[post("/backup")]
 pub async fn backup(
     req: HttpRequest,
     MultipartForm(form): MultipartForm<FormWithFile>,
-) -> Result<HttpResponse, Error> {
+) -> impl Responder {
     let token_from_auth = req.extensions().get::<String>().cloned();
 
     let value = token_from_auth
@@ -51,7 +57,10 @@ pub async fn backup(
         actix_web::error::ErrorInternalServerError(format!("Failed to save file: {}", e))
     })?;
 
-    Ok(HttpResponse::Ok().body("Data process is successful"))
+    let p = BackupResponse {
+        message: "Upload successful".to_string(),
+    };
+    Ok(web::Json(p))
 }
 
 fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> String {
