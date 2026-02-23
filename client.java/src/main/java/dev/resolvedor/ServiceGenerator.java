@@ -37,7 +37,6 @@ public class ServiceGenerator {
                 public Response intercept(Interceptor.Chain chain) throws IOException {
                     Request original = chain.request();
                     Request.Builder builder = original.newBuilder()
-                            .header("Content-Type", "application/json")
                             .header("Accept", "application/json")
                             .header("Authorization", "Bearer " + token);
                     Request request = builder.build();

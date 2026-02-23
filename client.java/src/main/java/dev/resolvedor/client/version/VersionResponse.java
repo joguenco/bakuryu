@@ -6,11 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class VersionResponse {
-    
+
     private String name;
     private String author;
     private String version;
-    private String version_database;
-    private String version_os;
-    private String version_runtime;
+    private String versionDatabase;
+    private String versionOs;
+    private String versionRuntime;
 }
