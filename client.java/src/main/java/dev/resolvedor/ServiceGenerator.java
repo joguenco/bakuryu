@@ -1,8 +1,13 @@
 package dev.resolvedor;
 
+import java.io.IOException;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ServiceGenerator {
 
@@ -21,6 +26,27 @@ public class ServiceGenerator {
         builder.client(httpClient.build());
         retrofit = builder.build();
 
+        return retrofit.create(serviceClass);
+    }
+
+    public <S> S createService(Class<S> serviceClass, String token) {
+        if (token != null) {
+            httpClient.interceptors().clear();
+            httpClient.addInterceptor(new Interceptor() {
+                @Override
+                public Response intercept(Interceptor.Chain chain) throws IOException {
+                    Request original = chain.request();
+                    Request.Builder builder = original.newBuilder()
+                            .header("Content-Type", "application/json")
+                            .header("Accept", "application/json")
+                            .header("Authorization", "Bearer " + token);
+                    Request request = builder.build();
+                    return chain.proceed(request);
+                }
+            });
+            builder.client(httpClient.build());
+            retrofit = builder.build();
+        }
         return retrofit.create(serviceClass);
     }
 }
