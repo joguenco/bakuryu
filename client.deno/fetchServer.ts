@@ -23,7 +23,6 @@ export async function upload(file: string, urlBackupServer: string, token: strin
 
   try {
     spinner.start()
-    await sleep(900)
     const fileData = await Deno.readFile(file)
     const formData = new FormData()
     formData.append('sha2_code', '123456')
