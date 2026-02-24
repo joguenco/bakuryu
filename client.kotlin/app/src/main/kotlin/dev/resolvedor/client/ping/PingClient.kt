@@ -15,7 +15,7 @@ class PingClient(urlBackupServer: String) {
             val response = call.execute()
             if (response.isSuccessful) {
                 val pingResponse = response.body()
-                println(pingResponse?.message)
+                print(pingResponse?.message)
             } else {
                 println("Request failed with code: " + response.code())
             }

@@ -15,12 +15,12 @@ class VersionClient(urlBackupServer: String)  {
             val response = call.execute()
             if (response.isSuccessful) {
                 val versionResponse = response.body()
-                println(versionResponse?.name)
-                println(versionResponse?.version)
-                println(versionResponse?.author)
-                println(versionResponse?.versionOs)
-                println(versionResponse?.versionDatabase)
-                println(versionResponse?.versionRuntime)
+                println("Name: ${versionResponse?.name}")
+                println("Author: ${versionResponse?.author}")
+                println("Version: ${versionResponse?.version}")
+                println("Database Version: ${versionResponse?.versionDatabase}")
+                println("OS Version: ${versionResponse?.versionOs}")
+                println("Runtime Version: ${versionResponse?.versionRuntime}")
             }
         } catch (e: Exception) {
             println(e.message)
