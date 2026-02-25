@@ -24,8 +24,10 @@ export async function upload(file: string, urlBackupServer: string, token: strin
   try {
     spinner.start()
     const fileData = await Deno.readFile(file)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', fileData)
+    const sha256 = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('')
     const formData = new FormData()
-    formData.append('sha2_code', '123456')
+    formData.append('sha2_code', sha256)
     const fileName = file.split('/').pop() || 'file'
     formData.append('file_data', new Blob([fileData]), fileName)
     const response = await fetch(path, {
