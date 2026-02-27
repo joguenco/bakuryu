@@ -2,11 +2,13 @@ use crate::DBPool;
 use crate::auth::mod_auth::get_claims_from_token;
 use crate::db::models::Entity;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
-use actix_web::{Error, HttpMessage, HttpRequest, Responder, post, web};
+use actix_web::http::StatusCode;
+use actix_web::{HttpMessage, HttpRequest, HttpResponse, Responder, ResponseError, post, web};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use log;
 use serde::Serialize;
+use std::fmt;
 use std::fs;
 use std::path::Path;
 
@@ -23,15 +25,31 @@ struct BackupResponse {
 }
 
 #[derive(Debug, Serialize)]
-struct ErrorResponse {
-    message: String,
+pub struct ErrorMessage {
+    pub code: u16,
+    pub message: String,
+}
+
+impl fmt::Display for ErrorMessage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl ResponseError for ErrorMessage {
+    fn error_response(&self) -> HttpResponse {
+        HttpResponse::build(
+            StatusCode::from_u16(self.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+        )
+        .json(self) // This converts the struct to a JSON response body
+    }
 }
 
 #[post("/backup")]
 pub async fn backup(
     req: HttpRequest,
     MultipartForm(form): MultipartForm<FormWithFile>,
-) -> impl Responder {
+) -> Result<impl Responder, ErrorMessage> {
     let token_from_auth = req.extensions().get::<String>().cloned();
 
     let value = token_from_auth
@@ -42,14 +60,22 @@ pub async fn backup(
         Ok(claims) => claims,
         Err(e) => {
             println!("Error extracting claims: {:?}", e);
-            return Err(actix_web::error::ErrorUnauthorized("Invalid token"));
+            return Err(ErrorMessage {
+                code: 401,
+                message: "Invalid token".to_string(),
+            });
         }
     };
 
     let pool = req.app_data::<web::Data<DBPool>>().unwrap();
     let mut conn = match pool.get() {
         Ok(conn) => conn,
-        Err(e) => return Err(actix_web::error::ErrorInternalServerError(e)),
+        Err(_) => {
+            return Err(ErrorMessage {
+                code: 500,
+                message: "Error to get connection to database".to_string(),
+            });
+        }
     };
 
     let file_name = form
@@ -60,16 +86,18 @@ pub async fn backup(
     let folder_path_to_save = get_path(&claim.name, &mut conn);
 
     if folder_path_to_save.is_empty() {
-        return Err(actix_web::error::ErrorInternalServerError(
-            "Folder not found".to_string(),
-        ));
+        return Err(ErrorMessage {
+            code: 404,
+            message: "Folder not found".to_string(),
+        });
     }
 
     let file_path = format!("{}/{}", folder_path_to_save, file_name);
 
-    fs::copy(&form.file_data.file.path(), &file_path).map_err(|e| {
-        actix_web::error::ErrorInternalServerError(format!("Failed to save file: {}", e))
-    })?;
+    let _ = fs::copy(&form.file_data.file.path(), &file_path).map_err(|e| ErrorMessage {
+        code: 500,
+        message: format!("Error to save file: {}", e),
+    });
 
     let p = BackupResponse {
         message: "Upload successful".to_string(),
