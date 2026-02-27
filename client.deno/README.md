@@ -10,6 +10,9 @@ TOKEN_SECRET=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyYWRtaW4ucmVzb2x2ZW
 ```
 # Run the program
 ```
+deno install
+```
+```
 deno run --allow-read --allow-env --allow-net main.ts --help
 ```
 # Compile

@@ -28,7 +28,17 @@ export async function upload(file: string, urlBackupServer: string, token: strin
     const sha256 = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('')
     const formData = new FormData()
     formData.append('sha2_code', sha256)
-    const fileName = file.split('/').pop() || 'file'
+    let fileName = 'file'
+
+    const os = Deno.build.os
+    if (os === 'windows') {
+      fileName = file.split('\\').pop() || 'file'
+    } else if (os === 'linux' || os === 'darwin') {
+      fileName = file.split('/').pop() || 'file'
+    } else {
+      fileName = 'file'
+    }
+
     formData.append('file_data', new Blob([fileData]), fileName)
     const response = await fetch(path, {
       method: 'POST',
