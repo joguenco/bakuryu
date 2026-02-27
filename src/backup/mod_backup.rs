@@ -2,9 +2,10 @@ use crate::DBPool;
 use crate::auth::mod_auth::get_claims_from_token;
 use crate::db::models::Entity;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
-use actix_web::{Error, HttpMessage, HttpRequest, Responder, Result, post, web};
+use actix_web::{Error, HttpMessage, HttpRequest, Responder, post, web};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
+use log;
 use serde::Serialize;
 use std::fs;
 use std::path::Path;
@@ -18,6 +19,11 @@ struct FormWithFile {
 
 #[derive(Serialize)]
 struct BackupResponse {
+    message: String,
+}
+
+#[derive(Debug, Serialize)]
+struct ErrorResponse {
     message: String,
 }
 
@@ -51,7 +57,15 @@ pub async fn backup(
         .file_name
         .unwrap_or_else(|| "unknown".to_string());
 
-    let file_path = format!("{}/{}", get_path(&claim.name, &mut conn), file_name);
+    let folder_path_to_save = get_path(&claim.name, &mut conn);
+
+    if folder_path_to_save.is_empty() {
+        return Err(actix_web::error::ErrorInternalServerError(
+            "Folder not found".to_string(),
+        ));
+    }
+
+    let file_path = format!("{}/{}", folder_path_to_save, file_name);
 
     fs::copy(&form.file_data.file.path(), &file_path).map_err(|e| {
         actix_web::error::ErrorInternalServerError(format!("Failed to save file: {}", e))
@@ -74,21 +88,34 @@ fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> String {
 
     match result_entity {
         Ok(Some(found_entity)) => {
-            let _ = create_folder_if_not_exist(&found_entity.folder_path);
-            found_entity.folder_path
+            let is_created = create_folder_if_not_exist(&found_entity.folder_path);
+            if is_created {
+                log::info!(
+                    "get_path - folder for {}: {}",
+                    name_from_jwt,
+                    found_entity.folder_path
+                );
+                found_entity.folder_path
+            } else {
+                log::error!(
+                    "get_path - folder not found for {}: {}",
+                    name_from_jwt,
+                    found_entity.folder_path
+                );
+                "".to_string()
+            }
         }
         Ok(None) => {
-            println!("No entity found for name: {}", name_from_jwt);
-            "/tmp".to_string()
+            log::warn!("get_path - no entity found for name: {}", name_from_jwt);
+            "".to_string()
         }
         Err(e) => {
-            println!("Database error: {:?}", e);
-            "/tmp".to_string()
+            log::error!("get_path - database error for {}: {:?}", name_from_jwt, e);
+            "".to_string()
         }
     }
 }
 
-fn create_folder_if_not_exist<P: AsRef<Path>>(path: P) -> std::io::Result<()> {
-    fs::create_dir_all(path)?;
-    Ok(())
+fn create_folder_if_not_exist<P: AsRef<Path>>(path: P) -> bool {
+    fs::create_dir_all(path).is_ok()
 }
