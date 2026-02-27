@@ -47,7 +47,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
     })
     .client_request_timeout(Duration::from_secs(180))
-    .bind(("127.0.0.1", port.parse().unwrap()))?
+    .bind(("0.0.0.0", port.parse().unwrap()))?
     .workers(3)
     .run()
     .await
