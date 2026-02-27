@@ -1,14 +1,13 @@
 use crate::DBPool;
 use crate::auth::mod_auth::get_claims_from_token;
+use crate::common::ErrorMessage;
 use crate::db::models::Entity;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
-use actix_web::http::StatusCode;
-use actix_web::{HttpMessage, HttpRequest, HttpResponse, Responder, ResponseError, post, web};
+use actix_web::{HttpMessage, HttpRequest, HttpResponse, Responder, post, web};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use log;
 use serde::Serialize;
-use std::fmt;
 use std::fs;
 use std::path::Path;
 
@@ -22,27 +21,6 @@ struct FormWithFile {
 #[derive(Serialize)]
 struct BackupResponse {
     message: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ErrorMessage {
-    pub code: u16,
-    pub message: String,
-}
-
-impl fmt::Display for ErrorMessage {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.message)
-    }
-}
-
-impl ResponseError for ErrorMessage {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(
-            StatusCode::from_u16(self.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
-        )
-        .json(self) // This converts the struct to a JSON response body
-    }
 }
 
 #[post("/backup")]
