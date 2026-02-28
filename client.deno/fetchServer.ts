@@ -1,4 +1,5 @@
 import { Spinner } from '@std/cli/unstable-spinner'
+import { ErrorMessage } from './errorMessage.ts'
 
 interface PingResponse {
   message: string
@@ -13,12 +14,16 @@ interface VersionResponse {
   versionRuntime: string
 }
 
-export async function upload(file: string, urlBackupServer: string, token: string): Promise<[boolean, string]> {
+export async function upload(
+  file: string,
+  urlBackupServer: string,
+  token: string,
+): Promise<[boolean, ErrorMessage | string]> {
   const path = urlBackupServer + '/backup'
   const message = `Uploading ...`
   const spinner = new Spinner({ message, color: 'yellow' })
   let statusResponse = false
-  let uploadMessage = ''
+  let uploadMessage: ErrorMessage | string = ''
   const start = performance.now()
 
   try {
@@ -50,11 +55,11 @@ export async function upload(file: string, urlBackupServer: string, token: strin
       statusResponse = true
       uploadMessage = 'File uploaded successfully'
     } else {
-      uploadMessage = `Upload failed: ${response.statusText}`
+      uploadMessage = await response.json() as ErrorMessage
     }
   } catch (error) {
     statusResponse = false
-    uploadMessage = `Upload failed: ${error instanceof Error ? error.message : String(error)}`
+    console.error('Error during file upload:', error)
   } finally {
     spinner.stop()
     const finish = performance.now()

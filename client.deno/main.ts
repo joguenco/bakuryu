@@ -42,7 +42,7 @@ if (args.help) {
   Deno.exit(0)
 } else if (args.version) {
   // Pro tip: add a version to your deno.json file
-  console.log(meta.version ? meta.version : '1.0.0')
+  console.log(meta.version)
   Deno.exit(0)
 }
 
@@ -92,7 +92,8 @@ if (args.ping) {
   if (success) {
     console.log(message)
   } else {
-    console.log(message)
+    const errorMessage = typeof message === 'string' ? message : (message.message || 'Unknown error')
+    console.log(`Upload failed: ${errorMessage}`)
   }
 } else {
   console.log('No valid command provided.')
