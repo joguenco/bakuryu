@@ -130,9 +130,9 @@ fn get_sha256_of_file(file_path: &str, input_sha2: &str) -> Result<String, Error
 }
 
 fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> String {
-    use crate::db::schema::entity::dsl::{entity, name};
+    use crate::db::schema::entities::dsl::{entities, name};
 
-    let result_entity = entity
+    let result_entity = entities
         .filter(name.eq(&name_from_jwt))
         .select(Entity::as_select())
         .first::<Entity>(conn)
