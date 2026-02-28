@@ -115,13 +115,13 @@
                 "isMultipart": true,
                 "fields": [
                   {
-                    "name": "sha2_code",
+                    "name": "sha2",
                     "value": "123456",
                     "enabled": true,
                     "type": "text"
                   },
                   {
-                    "name": "file_data",
+                    "name": "file",
                     "value": "",
                     "enabled": true,
                     "type": "file"

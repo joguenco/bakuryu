@@ -13,9 +13,9 @@ use std::path::Path;
 
 #[derive(Debug, MultipartForm)]
 struct FormWithFile {
-    sha2_code: Text<String>,
+    sha2: Text<String>,
     #[multipart(limit = "2048MB")]
-    file_data: TempFile,
+    file: TempFile,
 }
 
 #[derive(Serialize)]
@@ -56,10 +56,7 @@ pub async fn backup(
         }
     };
 
-    let file_name = form
-        .file_data
-        .file_name
-        .unwrap_or_else(|| "unknown".to_string());
+    let file_name = form.file.file_name.unwrap_or_else(|| "unknown".to_string());
 
     let folder_path_to_save = get_path(&claim.name, &mut conn);
 
@@ -72,7 +69,7 @@ pub async fn backup(
 
     let file_path = format!("{}/{}", folder_path_to_save, file_name);
 
-    let _ = fs::copy(&form.file_data.file.path(), &file_path).map_err(|e| ErrorMessage {
+    let _ = fs::copy(&form.file.file.path(), &file_path).map_err(|e| ErrorMessage {
         code: 500,
         message: format!("Error to save file: {}", e),
     });
