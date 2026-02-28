@@ -3,12 +3,14 @@ use crate::auth::mod_auth::get_claims_from_token;
 use crate::common::ErrorMessage;
 use crate::db::models::Entity;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
-use actix_web::{HttpMessage, HttpRequest, HttpResponse, Responder, post, web};
+use actix_web::{HttpMessage, HttpRequest, Responder, post, web};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use log;
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 use std::fs;
+use std::io::Read;
 use std::path::Path;
 
 #[derive(Debug, MultipartForm)]
@@ -69,15 +71,62 @@ pub async fn backup(
 
     let file_path = format!("{}/{}", folder_path_to_save, file_name);
 
-    let _ = fs::copy(&form.file.file.path(), &file_path).map_err(|e| ErrorMessage {
+    fs::copy(&form.file.file.path(), &file_path).map_err(|e| ErrorMessage {
         code: 500,
         message: format!("Error to save file: {}", e),
-    });
+    })?;
+
+    // Compute and validate SHA-256 of the saved file
+    get_sha256_of_file(&file_path, &form.sha2.0)?;
 
     let p = BackupResponse {
         message: "Upload successful".to_string(),
     };
     Ok(web::Json(p))
+}
+
+fn get_sha256_of_file(file_path: &str, input_sha2: &str) -> Result<String, ErrorMessage> {
+    // Compute SHA-256 of the saved file
+    let mut file = fs::File::open(file_path).map_err(|e| ErrorMessage {
+        code: 500,
+        message: format!("Error to open saved file for hashing: {}", e),
+    })?;
+
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 8192];
+
+    loop {
+        let n = file.read(&mut buffer).map_err(|e| ErrorMessage {
+            code: 500,
+            message: format!("Error to read saved file for hashing: {}", e),
+        })?;
+
+        if n == 0 {
+            break;
+        }
+
+        hasher.update(&buffer[..n]);
+    }
+
+    let computed_hash = hasher.finalize();
+    let computed_sha_hex = format!("{:x}", computed_hash);
+
+    let expected_sha = input_sha2.trim().to_lowercase();
+
+    log::info!(
+        "backup - provided sha256: {}, computed sha256: {}",
+        expected_sha,
+        computed_sha_hex
+    );
+
+    if computed_sha_hex != expected_sha {
+        return Err(ErrorMessage {
+            code: 400,
+            message: "SHA-256 mismatch".to_string(),
+        });
+    }
+
+    Ok(computed_sha_hex)
 }
 
 fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> String {
