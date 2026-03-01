@@ -2,6 +2,7 @@ use crate::DBPool;
 use crate::auth::mod_auth::get_claims_from_token;
 use crate::common::ErrorMessage;
 use crate::db::models::Entity;
+use crate::db::models::File;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
 use actix_web::{HttpMessage, HttpRequest, Responder, post, web};
 use diesel::pg::PgConnection;
@@ -60,16 +61,16 @@ pub async fn backup(
 
     let file_name = form.file.file_name.unwrap_or_else(|| "unknown".to_string());
 
-    let folder_path_to_save = get_path(&claim.name, &mut conn);
+    let entity_result = get_path(&claim.name, &mut conn);
 
-    if folder_path_to_save.is_empty() {
+    if entity_result.folder_path.is_empty() {
         return Err(ErrorMessage {
             code: 404,
             message: "Folder not found".to_string(),
         });
     }
 
-    let file_path = format!("{}/{}", folder_path_to_save, file_name);
+    let file_path = format!("{}/{}", entity_result.folder_path, file_name);
 
     fs::copy(&form.file.file.path(), &file_path).map_err(|e| ErrorMessage {
         code: 500,
@@ -77,12 +78,44 @@ pub async fn backup(
     })?;
 
     // Compute and validate SHA-256 of the saved file
-    get_sha256_of_file(&file_path, &form.sha2.0)?;
+    let sha256 = get_sha256_of_file(&file_path, &form.sha2.0)?;
+
+    save_info_in_db(&file_name, &sha256, entity_result.id, &mut conn)?;
 
     let p = BackupResponse {
         message: "Upload successful".to_string(),
     };
     Ok(web::Json(p))
+}
+
+fn save_info_in_db(
+    file_name: &str,
+    sha256: &str,
+    entity_id: i32,
+    conn: &mut PgConnection,
+) -> Result<(), ErrorMessage> {
+    use crate::db::schema::files::dsl::files;
+
+    use crate::db::models::File;
+
+    let new_file = File {
+        size: 0,
+        sha256: sha256.to_string(),
+        is_sha256_valid: Some(true),
+        is_restored: None,
+        file_name: file_name.to_string(),
+        entity_id,
+    };
+
+    diesel::insert_into(files)
+        .values(&new_file)
+        .execute(conn)
+        .map_err(|e| ErrorMessage {
+            code: 500,
+            message: format!("Error inserting file info into database: {}", e),
+        })?;
+
+    Ok(())
 }
 
 fn get_sha256_of_file(file_path: &str, input_sha2: &str) -> Result<String, ErrorMessage> {
@@ -129,10 +162,10 @@ fn get_sha256_of_file(file_path: &str, input_sha2: &str) -> Result<String, Error
     Ok(computed_sha_hex)
 }
 
-fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> String {
+fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> Entity {
     use crate::db::schema::entities::dsl::{entities, name};
 
-    let result_entity = entities
+    let result_entity: Result<Option<Entity>, diesel::result::Error> = entities
         .filter(name.eq(&name_from_jwt))
         .select(Entity::as_select())
         .first::<Entity>(conn)
@@ -147,23 +180,35 @@ fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> String {
                     name_from_jwt,
                     found_entity.folder_path
                 );
-                found_entity.folder_path
+                found_entity
             } else {
                 log::error!(
                     "get_path - folder not found for {}: {}",
                     name_from_jwt,
                     found_entity.folder_path
                 );
-                "".to_string()
+                found_entity
             }
         }
         Ok(None) => {
             log::warn!("get_path - no entity found for name: {}", name_from_jwt);
-            "".to_string()
+            Entity {
+                id: 0,
+                name: "".to_string(),
+                folder_path: "".to_string(),
+                store_type: None,
+                observation: None,
+            }
         }
         Err(e) => {
             log::error!("get_path - database error for {}: {:?}", name_from_jwt, e);
-            "".to_string()
+            Entity {
+                id: 0,
+                name: "".to_string(),
+                folder_path: "".to_string(),
+                store_type: None,
+                observation: None,
+            }
         }
     }
 }

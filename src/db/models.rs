@@ -20,11 +20,10 @@ pub struct Entity {
     pub observation: Option<String>,
 }
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::db::schema::files)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct File {
-    pub id: i32,
     pub entity_id: i32,
     pub file_name: String,
     pub size: i64,
