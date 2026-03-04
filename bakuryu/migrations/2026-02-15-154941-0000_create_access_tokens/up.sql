@@ -30,7 +30,7 @@ CREATE TABLE file_details (
     id SERIAL PRIMARY KEY,
     entity_id INTEGER NOT NULL,
     file_name VARCHAR NOT NULL,
-    size BIGINT NOT NULL,
+    size DECIMAL(10,2) NOT NULL,
     sha256 VARCHAR NOT NULL,
     is_sha256_valid BOOLEAN DEFAULT false,
     is_restored BOOLEAN DEFAULT false,

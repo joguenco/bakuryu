@@ -28,7 +28,7 @@ diesel::table! {
         id -> Int4,
         entity_id -> Int4,
         file_name -> Varchar,
-        size -> Int8,
+        size -> Numeric,
         sha256 -> Varchar,
         is_sha256_valid -> Nullable<Bool>,
         is_restored -> Nullable<Bool>,

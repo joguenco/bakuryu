@@ -5,6 +5,7 @@ use crate::db::models::Entity;
 use crate::db::models::FileDetail;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
 use actix_web::{HttpMessage, HttpRequest, Responder, post, web};
+use bigdecimal::{BigDecimal, FromPrimitive};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use log;
@@ -78,9 +79,41 @@ pub async fn backup(
     })?;
 
     // Compute and validate SHA-256 of the saved file
-    let sha256 = get_sha256_of_file(&file_path, &form.sha2.0)?;
+    let computed_sha_hex = get_sha256_of_file(&file_path)?;
 
-    save_info_in_db(&file_name, &sha256, entity_result.id, &mut conn)?;
+    let expected_sha = form.sha2.0.trim();
+    let file_size = get_file_size(&file_path)?;
+    log::info!(
+        "backup - provided sha256: {}, computed sha256: {}, and file size: {} MB",
+        expected_sha,
+        computed_sha_hex,
+        file_size
+    );
+
+    if expected_sha != computed_sha_hex {
+        save_info_in_db(
+            &file_name,
+            &computed_sha_hex,
+            file_size,
+            false,
+            entity_result.id,
+            &mut conn,
+        )?;
+
+        return Err(ErrorMessage {
+            code: 400,
+            message: "SHA-256 hash mismatch".to_string(),
+        });
+    }
+
+    save_info_in_db(
+        &file_name,
+        &computed_sha_hex,
+        file_size,
+        true,
+        entity_result.id,
+        &mut conn,
+    )?;
 
     let p = BackupResponse {
         message: "Upload successful".to_string(),
@@ -91,15 +124,17 @@ pub async fn backup(
 fn save_info_in_db(
     file_name: &str,
     sha256: &str,
+    file_size: f64,
+    is_sha256_valid: bool,
     entity_id: i32,
     conn: &mut PgConnection,
 ) -> Result<(), ErrorMessage> {
     use crate::db::schema::file_details::dsl::file_details;
 
     let new_file = FileDetail {
-        size: 0,
+        size: BigDecimal::from_f64(file_size).unwrap_or_else(|| BigDecimal::from(0)),
         sha256: sha256.to_string(),
-        is_sha256_valid: Some(true),
+        is_sha256_valid: Some(is_sha256_valid),
         is_restored: None,
         file_name: file_name.to_string(),
         entity_id,
@@ -116,7 +151,7 @@ fn save_info_in_db(
     Ok(())
 }
 
-fn get_sha256_of_file(file_path: &str, input_sha2: &str) -> Result<String, ErrorMessage> {
+fn get_sha256_of_file(file_path: &str) -> Result<String, ErrorMessage> {
     // Compute SHA-256 of the saved file
     let mut file = fs::File::open(file_path).map_err(|e| ErrorMessage {
         code: 500,
@@ -141,21 +176,6 @@ fn get_sha256_of_file(file_path: &str, input_sha2: &str) -> Result<String, Error
 
     let computed_hash = hasher.finalize();
     let computed_sha_hex = format!("{:x}", computed_hash);
-
-    let expected_sha = input_sha2.trim().to_lowercase();
-
-    log::info!(
-        "backup - provided sha256: {}, computed sha256: {}",
-        expected_sha,
-        computed_sha_hex
-    );
-
-    if computed_sha_hex != expected_sha {
-        return Err(ErrorMessage {
-            code: 400,
-            message: "SHA-256 mismatch".to_string(),
-        });
-    }
 
     Ok(computed_sha_hex)
 }
@@ -213,4 +233,13 @@ fn get_path(name_from_jwt: &str, conn: &mut PgConnection) -> Entity {
 
 fn create_folder_if_not_exist<P: AsRef<Path>>(path: P) -> bool {
     fs::create_dir_all(path).is_ok()
+}
+
+fn get_file_size(file_path: &str) -> Result<f64, ErrorMessage> {
+    fs::metadata(file_path)
+        .map(|m| m.len() as f64 / 1_048_576.0)
+        .map_err(|e| ErrorMessage {
+            code: 500,
+            message: format!("Error getting file size: {}", e),
+        })
 }

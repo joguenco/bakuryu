@@ -1,3 +1,4 @@
+use bigdecimal::BigDecimal;
 use diesel::prelude::*;
 
 #[derive(Queryable, Selectable)]
@@ -26,7 +27,7 @@ pub struct Entity {
 pub struct FileDetail {
     pub entity_id: i32,
     pub file_name: String,
-    pub size: i64,
+    pub size: BigDecimal,
     pub sha256: String,
     pub is_sha256_valid: Option<bool>,
     pub is_restored: Option<bool>,
