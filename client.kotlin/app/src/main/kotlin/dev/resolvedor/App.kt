@@ -5,6 +5,8 @@ import dev.resolvedor.client.ping.PingClient
 import dev.resolvedor.client.version.VersionClient
 import io.github.cdimascio.dotenv.dotenv
 import java.io.File
+import java.security.MessageDigest
+
 
 class App {
     val greeting: String
@@ -52,7 +54,6 @@ fun main(args: Array<String>) {
             }
 
             val filePath = args[1]
-            val sha2 = "123456"
             val file = File(filePath)
 
             if (!file.exists() || !file.isFile) {
@@ -60,6 +61,12 @@ fun main(args: Array<String>) {
                 return
             }
 
+            val sha2 = getSHA256(file)
+            if (sha2!!.isEmpty()) {
+                println("File not found: $filePath")
+                return
+            }
+            
             println("Uploading ...")
             val backupClient = BackupClient(urlBackupServer)
             backupClient.backup(
@@ -94,4 +101,36 @@ fun printMessage() {
               -u, --upload <file>      Upload backup file
             """.trimIndent()
     )
+}
+
+fun getSHA256(file: File): String? {
+    if (!file.exists() || !file.isFile) {
+        println("File does not exist or is not a file.")
+        return ""
+    }
+
+    try {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val inputStream = file.inputStream()
+        val byteArray = ByteArray(1024)
+        var bytesCount: Int
+
+        while (inputStream.read(byteArray).also { bytesCount = it } != -1) {
+            digest.update(byteArray, 0, bytesCount)
+        }
+
+        inputStream.close()
+
+        val hashBytes = digest.digest()
+        val hexString = StringBuilder()
+
+        for (b in hashBytes) {
+            String.format("%02x", b).also { hexString.append(it) }
+        }
+
+        return hexString.toString()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return ""
+    }
 }
