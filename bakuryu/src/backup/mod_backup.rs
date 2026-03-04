@@ -129,7 +129,44 @@ fn save_info_in_db(
     entity_id: i32,
     conn: &mut PgConnection,
 ) -> Result<(), ErrorMessage> {
-    use crate::db::schema::file_details::dsl::file_details;
+    use crate::db::schema::file_details::dsl::{
+        entity_id as db_entity_id, file_details, file_name as db_file_name,
+    };
+
+    let file_details_result: Result<Option<FileDetail>, diesel::result::Error> = file_details
+        .filter(db_file_name.eq(file_name))
+        .filter(db_entity_id.eq(entity_id))
+        .select(FileDetail::as_select())
+        .first::<FileDetail>(conn)
+        .optional();
+
+    match file_details_result {
+        Ok(Some(_)) => {
+            diesel::delete(file_details
+                .filter(db_file_name.eq(file_name))
+                .filter(db_entity_id.eq(entity_id)))
+                .execute(conn)
+                .map_err(|e| ErrorMessage {
+                    code: 500,
+                    message: format!("Error deleting existing file info from database for file: {} and entity_id: {}: {}", file_name, entity_id, e),
+                })?;
+
+            log::info!(
+                "Existing file info deleted from database for file: {} and entity_id: {}",
+                file_name,
+                entity_id
+            );
+        }
+        Ok(None) => {}
+        Err(e) => {
+            log::error!(
+                "Error querying file info from database for file: {} and entity_id: {}: {:?}",
+                file_name,
+                entity_id,
+                e
+            );
+        }
+    }
 
     let new_file = FileDetail {
         size: BigDecimal::from_f64(file_size).unwrap_or_else(|| BigDecimal::from(0)),
