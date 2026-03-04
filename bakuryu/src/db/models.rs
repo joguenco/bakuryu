@@ -21,9 +21,9 @@ pub struct Entity {
 }
 
 #[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::db::schema::files)]
+#[diesel(table_name = crate::db::schema::file_details)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct File {
+pub struct FileDetail {
     pub entity_id: i32,
     pub file_name: String,
     pub size: i64,

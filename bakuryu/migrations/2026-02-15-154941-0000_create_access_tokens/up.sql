@@ -26,7 +26,7 @@ COMMENT ON TABLE entities IS 'Is one by one associated with an access token.';
 COMMENT ON COLUMN entities.name IS 'Is present in JWT token for identification of the entity.';
 COMMENT ON COLUMN entities.store_type IS 'file system or S3.';
 
-CREATE TABLE files (
+CREATE TABLE file_details (
     id SERIAL PRIMARY KEY,
     entity_id INTEGER NOT NULL,
     file_name VARCHAR NOT NULL,
@@ -36,10 +36,10 @@ CREATE TABLE files (
     is_restored BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT files_entities_fk FOREIGN KEY (entity_id) REFERENCES entities(id) ON DELETE CASCADE
+    CONSTRAINT file_details_entities_fk FOREIGN KEY (entity_id) REFERENCES entities(id) ON DELETE CASCADE
 );
-COMMENT ON COLUMN files.size IS 'Size of the file in megabytes (MB)';
-COMMENT ON COLUMN files.is_restored IS 'Whether the file was restored from backup.';
+COMMENT ON COLUMN file_details.size IS 'Size of the file in megabytes (MB)';
+COMMENT ON COLUMN file_details.is_restored IS 'Whether the file was restored from backup.';
 
 WITH inserted_token AS (
     INSERT INTO access_tokens (token, status) 

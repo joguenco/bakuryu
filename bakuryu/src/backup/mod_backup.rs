@@ -2,7 +2,7 @@ use crate::DBPool;
 use crate::auth::mod_auth::get_claims_from_token;
 use crate::common::ErrorMessage;
 use crate::db::models::Entity;
-use crate::db::models::File;
+use crate::db::models::FileDetail;
 use actix_multipart::form::{MultipartForm, tempfile::TempFile, text::Text};
 use actix_web::{HttpMessage, HttpRequest, Responder, post, web};
 use diesel::pg::PgConnection;
@@ -94,11 +94,9 @@ fn save_info_in_db(
     entity_id: i32,
     conn: &mut PgConnection,
 ) -> Result<(), ErrorMessage> {
-    use crate::db::schema::files::dsl::files;
+    use crate::db::schema::file_details::dsl::file_details;
 
-    use crate::db::models::File;
-
-    let new_file = File {
+    let new_file = FileDetail {
         size: 0,
         sha256: sha256.to_string(),
         is_sha256_valid: Some(true),
@@ -107,7 +105,7 @@ fn save_info_in_db(
         entity_id,
     };
 
-    diesel::insert_into(files)
+    diesel::insert_into(file_details)
         .values(&new_file)
         .execute(conn)
         .map_err(|e| ErrorMessage {

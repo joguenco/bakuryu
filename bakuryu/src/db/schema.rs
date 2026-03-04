@@ -24,7 +24,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    files (id) {
+    file_details (id) {
         id -> Int4,
         entity_id -> Int4,
         file_name -> Varchar,
@@ -38,6 +38,6 @@ diesel::table! {
 }
 
 diesel::joinable!(entities -> access_tokens (access_token_id));
-diesel::joinable!(files -> entities (entity_id));
+diesel::joinable!(file_details -> entities (entity_id));
 
-diesel::allow_tables_to_appear_in_same_query!(access_tokens, entities, files,);
+diesel::allow_tables_to_appear_in_same_query!(access_tokens, entities, file_details,);
