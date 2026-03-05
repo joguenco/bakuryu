@@ -61,4 +61,8 @@ Redo migration
 ```
 diesel migration revert
 ```
-
+## Build release
+Executable is in target/release/ folder
+```
+cargo build --release
+```

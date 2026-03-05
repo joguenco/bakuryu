@@ -70,9 +70,31 @@ server {
 }
 
 ```
-
 ## Utils
 - Change password
 ```
 ALTER USER bakuryu WITH PASSWORD 'newpassword';
 ```
+## Generate tokens
+- Use https://github.com/joguenco/Radmin application
+- Use PRIVATE_KEY variable in .env file to generate token, for example:
+```
+curl -X 'POST' \
+  'http://localhost:8000/generator' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyYWRtaW4ucmVzb2x2ZWRvci5kZXYiLCJpYXQiOjE3Njk5OTkxODksImV4cCI6MTc4NTU1MTE4OSwiYXVkIjoicmVzb2x2ZWRvci5kZXYiLCJzdWIiOiJidXNzaW5lc0ByZXNvbHZlZG9yLmRldiIsImNsaWVudCI6IjEyMzQ1Njc4OTAiLCJuYW1lIjoiSm9yZ2UgTHVpcyIsImVtYWlsIjoiam9yZ2VsdWlzQHJlc29sdmVkb3IuZGV2Iiwicm9sZSI6WyJNYW5hZ2VyIl0sInNlcnZpY2UiOiJSYWRtaW4ifQ.Rg615F3IPVsAusaIqLzCupnTvr7D8KyJOAD-pxJ-DXU' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "identifier": "1234567890123",
+  "name": "Jorge Luis",
+  "email": "jorgeluis@resolvedor.dev",
+  "expitation_date": "2099-03-05",
+  "role": [
+    "backup"
+  ],
+  "private_key": "0123456789qwertyuiopasdfghjklzxcvbnm",
+  "issuer": "bakuryu",
+  "service": "http://localhost:8181"
+}'
+```
+or access to swagger http://localhost:8000/docs
