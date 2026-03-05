@@ -13,17 +13,17 @@ TOKEN_SECRET=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyYWRtaW4ucmVzb2x2ZW
 deno install
 ```
 ```
-deno run --allow-read --allow-env --allow-net main.ts --help
+deno run --allow-read --allow-env --allow-net src/main.ts --help
 ```
 # Compile
 - Windows
-deno compile --allow-read --allow-env --allow-net --target x86_64-pc-windows-msvc main.ts
+deno compile --allow-read --allow-env --allow-net --target x86_64-pc-windows-msvc src/main.ts
 ```
 - GNU/Linux
 ```
-deno compile --allow-read --allow-env --allow-net --target x86_64-unknown-linux-gnu main.ts
+deno compile --allow-read --allow-env --allow-net --target x86_64-unknown-linux-gnu src/main.ts
 ```
 - Mac Os
 ```
-deno compile --allow-read --allow-env --allow-net --target aarch64-apple-darwin main.ts
+deno compile --allow-read --allow-env --allow-net --target aarch64-apple-darwin src/main.ts
 ```

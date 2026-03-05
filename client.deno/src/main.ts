@@ -2,7 +2,7 @@ import '@std/dotenv/load'
 import { parseArgs, ParseOptions } from '@std/cli/parse-args'
 import { promptSecret } from '@std/cli/prompt-secret'
 
-import meta from './deno.json' with { type: 'json' }
+import meta from '../deno.json' with { type: 'json' }
 import { ping, upload, version } from './fetchServer.ts'
 
 function printUsage() {
