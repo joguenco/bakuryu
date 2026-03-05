@@ -1,11 +1,10 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     application
+    id("com.ncorti.ktfmt.gradle") version "0.25.0"
 }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -17,24 +16,14 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
-}
+java { toolchain { languageVersion = JavaLanguageVersion.of(8) } }
 
-application {
-    mainClass = "dev.resolvedor.AppKt"
-}
+application { mainClass = "dev.resolvedor.AppKt" }
 
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}
+tasks.named<Test>("test") { useJUnitPlatform() }
 
 tasks.withType<org.gradle.jvm.tasks.Jar> {
-    manifest {
-        attributes["Main-Class"] = "dev.resolvedor.AppKt"
-    }
+    manifest { attributes["Main-Class"] = "dev.resolvedor.AppKt" }
 
     from(
         configurations.runtimeClasspath.get().map { file ->
@@ -44,3 +33,5 @@ tasks.withType<org.gradle.jvm.tasks.Jar> {
 
     duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
 }
+
+ktfmt { kotlinLangStyle() }

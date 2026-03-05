@@ -1,8 +1,6 @@
 package dev.resolvedor.client.ping
 
 import dev.resolvedor.client.ServiceGenerator
-import retrofit2.Call
-import retrofit2.Response
 
 class PingClient(urlBackupServer: String) {
     private val generator: ServiceGenerator = ServiceGenerator(urlBackupServer)

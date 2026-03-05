@@ -1,12 +1,12 @@
 package dev.resolvedor.client.backup
 
 import dev.resolvedor.client.ServiceGenerator
+import java.io.File
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
-import java.io.File
 
 class BackupClient(urlBackupServer: String) {
 
@@ -17,7 +17,7 @@ class BackupClient(urlBackupServer: String) {
 
         val sha2Body = sha2.toRequestBody("text/plain".toMediaTypeOrNull())
         val fileRequestBody = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
-        val filePart = MultipartBody.Part.createFormData("file_data", file.name, fileRequestBody)
+        val filePart = MultipartBody.Part.createFormData("file", file.name, fileRequestBody)
 
         try {
             val call: Call<BackupResponse> = service.postBackup(sha2Body, filePart)
@@ -32,4 +32,3 @@ class BackupClient(urlBackupServer: String) {
         }
     }
 }
-

@@ -2,13 +2,13 @@ package dev.resolvedor.client.version
 
 import dev.resolvedor.client.ServiceGenerator
 
-class VersionClient(urlBackupServer: String)  {
+class VersionClient(urlBackupServer: String) {
 
     private val generator: ServiceGenerator = ServiceGenerator(urlBackupServer)
 
     fun version(tokenSecret: String) {
-        val service = generator.createService(serviceClass = VersionService::class.java,
-            token = tokenSecret)
+        val service =
+            generator.createService(serviceClass = VersionService::class.java, token = tokenSecret)
         val call = service.getVersion()
 
         try {

@@ -1,5 +1,3 @@
 package dev.resolvedor.client.ping
 
-data class PingResponse (
-    val message: String
-)
+data class PingResponse(val message: String)

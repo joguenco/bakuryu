@@ -7,7 +7,6 @@ import io.github.cdimascio.dotenv.dotenv
 import java.io.File
 import java.security.MessageDigest
 
-
 class App {
     val greeting: String
         get() {
@@ -27,27 +26,32 @@ fun main(args: Array<String>) {
     }
 
     when (args[0].lowercase()) {
-        "-h", "--help" -> {
+        "-h",
+        "--help" -> {
             printMessage()
         }
 
-        "-v", "--version" -> {
+        "-v",
+        "--version" -> {
             println("Bakuryu Client Version: 1.0.0")
         }
 
-        "-p", "--ping" -> {
+        "-p",
+        "--ping" -> {
             print("Server responded: ")
             val pingClient = PingClient(urlBackupServer)
             pingClient.ping()
         }
 
-        "-s", "--version-server" -> {
+        "-s",
+        "--version-server" -> {
             println("Backup Server Version Information:")
             val versionClient = VersionClient(urlBackupServer)
             versionClient.version(tokenSecret)
         }
 
-        "-u", "--upload" -> {
+        "-u",
+        "--upload" -> {
             if (args.size < 2) {
                 println("Usage: client -u <file-path>")
                 return
@@ -66,14 +70,10 @@ fun main(args: Array<String>) {
                 println("File not found: $filePath")
                 return
             }
-            
+
             println("Uploading ...")
             val backupClient = BackupClient(urlBackupServer)
-            backupClient.backup(
-                file = file,
-                sha2 = sha2,
-                tokenSecret = tokenSecret
-            )
+            backupClient.backup(file = file, sha2 = sha2, tokenSecret = tokenSecret)
         }
 
         else -> {
@@ -86,20 +86,21 @@ fun main(args: Array<String>) {
 fun printMessage() {
     println(
         """
-            Usage:
-            Ping to backup server:
-              client --ping
-            Show the version number of backup server:
-              client --version-server
-            Upload backup file:
-              client --upload <file>
-            Options:
-              -h, --help               Show this help message
-              -v, --version            Show the version number
-              -p, --ping               Ping the backup server
-              -s, --version-server     Show the version number of backup server
-              -u, --upload <file>      Upload backup file
-            """.trimIndent()
+        Usage:
+        Ping to backup server:
+          client --ping
+        Show the version number of backup server:
+          client --version-server
+        Upload backup file:
+          client --upload <file>
+        Options:
+          -h, --help               Show this help message
+          -v, --version            Show the version number
+          -p, --ping               Ping the backup server
+          -s, --version-server     Show the version number of backup server
+          -u, --upload <file>      Upload backup file
+        """
+            .trimIndent()
     )
 }
 

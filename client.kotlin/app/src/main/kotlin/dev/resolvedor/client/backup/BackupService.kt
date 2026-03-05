@@ -11,7 +11,7 @@ interface BackupService {
     @Multipart
     @POST("/backup")
     fun postBackup(
-        @Part("sha2_code") sha2: RequestBody,
-        @Part fileData: MultipartBody.Part
+        @Part("sha2") sha2: RequestBody,
+        @Part file: MultipartBody.Part,
     ): Call<BackupResponse>
 }
