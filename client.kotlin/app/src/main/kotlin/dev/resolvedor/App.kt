@@ -17,7 +17,7 @@ class App {
 fun main(args: Array<String>) {
 
     val dotenv = dotenv()
-    val urlBackupServer = dotenv["URL_BACKUP_SERVER"] ?: error("URL_BACKUP_SERVER not set in .env")
+    val urlBackupServer = dotenv["URL_SERVER"] ?: error("URL_SERVER not set in .env")
     val tokenSecret = dotenv["TOKEN_SECRET"] ?: error("TOKEN_SECRET not set in .env")
 
     if (args.isEmpty()) {

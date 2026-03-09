@@ -54,7 +54,7 @@ if (!args.URL || !args.token) {
 }
 
 // attempt to get the username and password from environment variables
-let urlBackupServer = Deno.env.get('URL_BACKUP_SERVER')
+let urlBackupServer = Deno.env.get('URL_SERVER')
 let tokenSecret = Deno.env.get('TOKEN_SECRET')
 
 if (urlBackupServer === undefined) {

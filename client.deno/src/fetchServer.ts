@@ -32,7 +32,7 @@ export async function upload(
     const hashBuffer = await crypto.subtle.digest('SHA-256', fileData)
     const sha256 = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('')
     const formData = new FormData()
-    formData.append('sha2_code', sha256)
+    formData.append('sha2', sha256)
     let fileName = 'file'
 
     const os = Deno.build.os
@@ -44,7 +44,7 @@ export async function upload(
       fileName = 'file'
     }
 
-    formData.append('file_data', new Blob([fileData]), fileName)
+    formData.append('file', new Blob([fileData]), fileName)
     const response = await fetch(path, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
