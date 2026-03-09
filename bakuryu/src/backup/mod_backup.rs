@@ -41,7 +41,7 @@ pub async fn backup(
     let claim = match get_claims_from_token(&value) {
         Ok(claims) => claims,
         Err(e) => {
-            println!("Error extracting claims: {:?}", e);
+            log::error!("Error extracting claims: {:?}", e);
             return Err(ErrorMessage {
                 code: 401,
                 message: "Invalid token".to_string(),
@@ -53,6 +53,7 @@ pub async fn backup(
     let mut conn = match pool.get() {
         Ok(conn) => conn,
         Err(_) => {
+            log::error!("Error to get connection to database");
             return Err(ErrorMessage {
                 code: 500,
                 message: "Error to get connection to database".to_string(),
@@ -65,6 +66,7 @@ pub async fn backup(
     let entity_result = get_path(&claim.name, &mut conn);
 
     if entity_result.folder_path.is_empty() {
+        log::error!("Folder not found");
         return Err(ErrorMessage {
             code: 404,
             message: "Folder not found".to_string(),
@@ -99,6 +101,7 @@ pub async fn backup(
             entity_result.id,
             &mut conn,
         )?;
+        log::warn!("SHA-256 hash mismatch");
 
         return Err(ErrorMessage {
             code: 400,

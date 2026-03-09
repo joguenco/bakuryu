@@ -20,7 +20,6 @@ pub struct Claims {
     pub(crate) name: String,
     email: String,
     role: Vec<String>,
-    service: String,
 }
 
 pub async fn auth_validator(
@@ -64,8 +63,9 @@ pub fn get_claims_from_token(token: &str) -> Result<Claims, jsonwebtoken::errors
     let secret = secret_env.as_bytes();
     let decoding_key = DecodingKey::from_secret(secret);
     let mut validation = Validation::new(Algorithm::HS256);
-    validation.validate_exp = false;
-    validation.set_audience(&["resolvedor.dev"]);
+    validation.validate_exp = true;
+    validation.validate_aud = false;
+    //validation.set_audience(&["resolvedor.dev"]);
     let token_data = decode::<Claims>(token, &decoding_key, &validation)?;
     Ok(token_data.claims)
 }
