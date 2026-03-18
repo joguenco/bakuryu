@@ -7,3 +7,5 @@ app/bin/
 .idea/
 .env
 .kotlin
+local.properties
+

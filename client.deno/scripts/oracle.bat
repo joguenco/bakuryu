@@ -3,6 +3,8 @@ setlocal
 
 Call :GetDateTime Year Month Day Hour Minute Second
 set date_now=%Year%-%Month%-%Day%_%Hour%-%Minute%
+set URL_SERVER=http://0.0.0.0:8181
+set TOKEN_SECRET=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyYWRtaW4ucmVzb2x2ZWRvci5kZXYiLCJpYXQiOjE3NzExOTcwNDAsImV4cCI6Mzk5NjEwNDQwMC4wLCJhdWQiOiJyZXNvbHZlZG9yLmRldiIsInN1YiI6ImJ1c3NpbmVzQHJlc29sdmVkb3IuZGV2IiwiY2xpZW50IjoiMTIzNDU2Nzg5MCIsIm5hbWUiOiJKb3JnZSBMdWlzIiwiZW1haWwiOiJqb3JnZWx1aXNAcmVzb2x2ZWRvci5kZXYiLCJyb2xlIjpbImRlbW8iXSwic2VydmljZSI6IlJhZG1pbiJ9.anbHFr1WgMi4l-8FYoneVAmSG7h6LN6xTsD0nWtXBfs
 
 echo date_now: %date_now%
 
@@ -12,11 +14,8 @@ expdp system/MySecret0@orcl schemas=demo,demo_data DIRECTORY=backup dumpfile=dem
 C:\app\backup\client.exe -u C:\app\backup\demo%date_now%.7z
 C:\app\backup\client.exe -u C:\app\backup\oracle.bat
 
-echo "Delete uncompressed backup"
-del C:\app\backup\demo%date_now%.dmp
-
-echo "Delete older files than 30 days and .7z extension"
 forfiles /p "C:\app\backup" /s /m *.7z /d -30 /c "cmd /c del /q @path"
+forfiles /p "C:\app\backup" /s /m *.dmp /d -30 /c "cmd /c del /q @path"
 
 :GetDateTime Year Month Day Hour Minute Second
 @echo off & setlocal
