@@ -16,11 +16,10 @@ PRIVATE_KEY=0123456789qwertyuiopasdfghjklzxcvbnm
 - Issuer (Service name)
 - Private Key (PRIVATE_KEY variable of the server)
 
-3. Click in Generate button and copy the TOKEN_SECRET value
+3. Click in Generate button and Copy button, then create .env file in main server on backup folder path with URL_SERVER and TOKEN_SECRET variables, such as in README.md of this project
 
 4. Connect to bakuryu database and set the TOKEN_SECRET
-- Connect direct to database
-- Connect to remote database with port forwarding
+- Connect direct to database or connect to remote database with port forwarding
 ```
 ssh -L 5432:127.0.0.1:5432 -C -N -l root 192.168.1.18
 ```
@@ -43,13 +42,12 @@ deno run build_linux
 ```
 deno run build_windows
 ```
-7. Copy the executable to the main server
+7. Copy the executable to the main server on backup folder path
 8. In the main sever, execute
 - For show option commands
 ```
 ./client --help
 ```
-- Create the .env such as in README.md file
 - Ping
 ```
 ./client -p
@@ -62,3 +60,4 @@ deno run build_windows
 ```
 ./client -u /data/bak/file.7z
 ```
+9. Create .sh or .bat script such as in scripts folder
