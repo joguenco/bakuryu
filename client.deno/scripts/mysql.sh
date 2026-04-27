@@ -9,6 +9,6 @@ mysqldump -uroot -pSecret123 mydb > /data/app/bak/mydb$date_now.sql
 7z a /data/app/bak/mydb$date_now.sql.7z /data/app/bak/mydb$date_now.sql
 
 /data/app/bak/client -u /data/app/bak/mydb$date_now.sql.7z
-/data/app/bak/client -u /data/app/bak/mysql.bash
+/data/app/bak/client -u /data/app/bak/mysql.sh
 
-find /data/app/bak -mtime +18 -type f ! -name 'backup.sh' -delete
+find /data/app/bak -mtime +18 -type f ! -name 'mysql.sh' -delete
